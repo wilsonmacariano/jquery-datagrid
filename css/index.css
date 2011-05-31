@@ -1,0 +1,153 @@
+* {
+    font-family: arial;
+    font-size: 14px;
+}
+.title {
+    text-align: center;
+    font-size: 25px;
+}
+#tableComponent2 {
+    margin-left: auto;
+    margin-right: auto;
+}
+#tableComponent2 input[type='text'] {
+    width: 100%;
+    height: 18px;
+}
+#tableComponent2 tbody td {
+    border-color: black;
+    border: 1px solid;
+    height: 30px;
+}
+#tableComponent {
+    margin-left: auto;
+    margin-right: auto;
+}
+#tableComponent tbody tr:hover {
+    background-color: #e4f0f9;
+}
+#tableComponent tbody tr.ui-selected-row:hover  {
+}
+#tableComponent tbody tr.ui-selected-row td.ui-selected-cell {
+
+}
+th .ui-icon-triangle-1-s {
+    display: none;
+}
+th .ui-icon-triangle-1-n {
+    display: none;
+}
+th.rsorted .ui-icon-triangle-2-n-s {
+    display: none;
+}
+th.rsorted .ui-icon-triangle-1-s {
+    display: none;
+}
+th.rsorted .ui-icon-triangle-1-n {
+    display: block;
+}
+th.sorted .ui-icon-triangle-2-n-s {
+    display: none;
+}
+th.sorted .ui-icon-triangle-1-s {
+    display: block;
+}
+th.sorted .ui-icon-triangle-1-n {
+    display: none;
+}
+#tableComponent thead td {
+    height: 30px;
+}
+#tableComponent thead th {
+    height: 25px;
+}
+
+#tableComponent thead th span {
+    float: right;
+}
+#tableComponent tbody td {
+    border: 0px;
+    height: 28px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#tableComponent tbody input[type='text'] {
+    font-size: 14px;
+    border: 0px;
+    width: 100%;
+    background-color: transparent;
+}
+#tableComponent tbody select {
+    font-size: 14px;
+    border: 0px;
+    width: 100%;
+    background-color: transparent;
+}
+
+#tableComponent .ui-selected {
+    background-color: gold;
+}
+#tableComponent .td-id input {
+    text-align: right;
+}
+#tableComponent .td-id {
+    text-align: right;
+}
+#tableComponent .td-date {
+    text-align: right;
+}
+#tableComponent .td-date input {
+    text-align: right;
+}
+#tableComponent .td-dinheiro {
+    text-align: right;
+}
+#tableComponent .td-dinheiro input {
+    text-align: right;
+}
+#tableComponent .td-masterDegree {
+    text-align: center;
+}
+#tableComponent .td-masterDegree select {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+col.col-id {
+    width: 40px;
+    background-color: #ebf2f6;
+}
+col.col-name {
+    width: 400px;
+    background-color: #f7f9fb;
+}
+col.col-sex {
+    width: 100px;
+    background-color: #ebf2f6;
+}
+col.col-date {
+    width: 100px;
+    background-color: #f7f9fb;
+}
+col.col-masterDegree {
+    width: 100px;
+    background-color: #ebf2f6;
+}
+col.col-dinheiro {
+    width: 100px;
+    background-color: #f7f9fb;
+}
+.ui-checkbox {
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-image: url('images/ui-checkbox.png');
+}
+.ui-checkbox-on {
+    background-position: bottom;
+}
+
+.ui-checkbox-off {
+    background-position: top;
+}
