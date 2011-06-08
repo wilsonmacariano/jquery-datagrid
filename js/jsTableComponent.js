@@ -7,15 +7,18 @@
 
     var navigator = {
         findNextEditableTableCell : function( tableCell ) {
-            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            var tableBody = $(tableCell).parents('tbody')[0];
+            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            //            var tableBody = $(tableCell).parents('tbody')[0];
+            var metadata = $(tableCell).findFirstParent('table').data('metadata');
+            var tableBody = $(tableCell).findFirstParent('tbody')[0];
 
             var nextTableCell = tableCell;
             do {
                 if ( nextTableCell.nextSibling ) {
                     nextTableCell = nextTableCell.nextSibling;
                 } else {
-                    var tableRow = $(nextTableCell).parents('tr')[0];
+                    //                    var tableRow = $(nextTableCell).parents('tr')[0];
+                    var tableRow = $(nextTableCell).findFirstParent('tr')[0];
                     if ( tableRow.sectionRowIndex + 1 < tableBody.rows.length  ) {
                         nextTableCell = tableBody.rows[tableRow.sectionRowIndex + 1].cells[0];
                     } else {
@@ -28,15 +31,18 @@
 
         },
         findPreviousEditableTableCell : function(tableCell) {
-            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            var tableBody = $(tableCell).parents('tbody')[0];
+            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            //            var tableBody = $(tableCell).parents('tbody')[0];
+            var metadata = $(tableCell).findFirstParent('table').data('metadata');
+            var tableBody = $(tableCell).findFirstParent('tbody')[0];
 
             var previousTableCell = tableCell;
             do {
                 if ( previousTableCell.previousSibling ) {
                     previousTableCell = previousTableCell.previousSibling;
                 } else {
-                    var tableRow = $(previousTableCell).parents('tr')[0];
+                    //                    var tableRow = $(previousTableCell).parents('tr')[0];
+                    var tableRow = $(previousTableCell).findFirstParent('tr')[0];
                     if ( tableRow.sectionRowIndex - 1 >= 0  ) {
                         var cellLength = tableBody.rows[tableRow.sectionRowIndex - 1].cells.length;
                         previousTableCell = tableBody.rows[tableRow.sectionRowIndex - 1].cells[cellLength-1];
@@ -65,14 +71,20 @@
         turnCellEditable : function( tableCell ) {
 
             // get metadata from table
-            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            var metadata = $(tableCell).findFirstParent('table').data('metadata');
 
             // if this field is not editable, stop 'propagation'
-            if ( !metadata[tableCell.fieldName].editable ) {
+            var fieldExists = tableCell.fieldName == undefined ? false : true;
+            if ( !fieldExists ) {
+                return; 
+            }
+            if ( !( metadata[tableCell.fieldName].editable ) ) {
                 return;
             }
 
-            var tableRow = $(tableCell).parents('tr')[0];
+            //            var tableRow = $(tableCell).parents('tr')[0];
+            var tableRow = $(tableCell).findFirstParent('tr')[0];
 
             // Clean the tableCell
             $(tableCell).empty();
@@ -99,8 +111,10 @@
 
             // Onchange
             $(input).change( function( event ) {
-                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                var tableRow = $( event.target ).parents('tr')[0];
+                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+                //                var tableRow = $( event.target ).parents('tr')[0];
+                var metadata = $( tableCell ).findFirstParent('table').data('metadata');
+                var tableRow = $( event.target ).findFirstParent('tr')[0];
 
                 var model;
                 if ( tableRow.modified ) {
@@ -151,7 +165,10 @@
         },
         removeTableRow : function(tableRow) {
             $(tableRow).remove();
-            manipulator.applyEvenAndOdd($(tableRow).parents('table')[0]);
+            //            manipulator.applyEvenAndOdd($(tableRow).parents('table')[0]);
+            var tableParent = $(tableRow).findFirstParent('table');
+            if ( tableParent && tableParent.length > 0 )
+                manipulator.applyEvenAndOdd(tableParent[0]);
         },
         applyEvenAndOdd : function(table) {
             var tbody = $(table).find('tbody')[0];
@@ -164,15 +181,17 @@
                 }
 
                 if ( j % 2 ) {
-                    $(tbody.rows[j]).addClass('odd');
-                } else {
                     $(tbody.rows[j]).addClass('even');
+                } else {
+                    $(tbody.rows[j]).addClass('odd');
                 }
             }
         },
         turnOffCellEditable : function( tableCell ) {
-            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            var tableRow = $(tableCell).parents('tr')[0];
+            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            //            var tableRow = $(tableCell).parents('tr')[0];
+            var metadata = $(tableCell).findFirstParent('table').data('metadata');
+            var tableRow = $(tableCell).findFirstParent('tr')[0];
 
             $(tableCell).empty();
 
@@ -253,9 +272,10 @@
                 var tableRow = manipulator.createRow(metadata, data[j], rowsRemovable);
 
                 if ( j % 2 ) {
-                    tableRow.className = "odd";
-                } else {
                     tableRow.className = "even";
+                }
+                else {
+                    tableRow.className = "odd";
                 }
 
                 tableRow.model = data[j];
@@ -275,7 +295,9 @@
             }
             if ( rowsRemovable ) {
                 var removable = builder.buildTableCell();
-                removable.className = "ui-icon ui-icon-trash removable";
+                var span = builder.buildSpan();
+                span.className = "ui-icon ui-icon-trash removable";
+                removable.appendChild(span);
                 $(tableRow).append(removable);
             }
             return tableRow;
@@ -286,11 +308,15 @@
 
                 var keynum = event.keyCode;
 
-                var tableCell = $(this).parents('td')[0];
+                //                var tableCell = $(this).parents('td')[0];
+                var tableCell = $(this).findFirstParent('td')[0];
 
-                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                var tableRow = $( event.target ).parents('tr')[0];
-                var tbody = $(tableRow).parents('tbody')[0];
+                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+                //                var tableRow = $( event.target ).parents('tr')[0];
+                //                var tbody = $(tableRow).parents('tbody')[0];
+                var metadata = $( tableCell ).findFirstParent('table').data('metadata');
+                var tableRow = $( event.target ).findFirstParent('tr')[0];
+                var tbody = $( tableRow ).findFirstParent('tbody')[0];
 
                 if ( event.shiftKey && keynum == 9 ) { // Shift + Tab
 
@@ -322,7 +348,7 @@
                     }
 
                     event.preventDefault();
-                } else if ( keynum == 13 ) {   // Tab
+                } else if ( keynum == 13 ) {   // Enter
                     var model;
                     if ( tableRow.modified ) {
                         model = tableRow.modified;
@@ -342,7 +368,8 @@
                                     id: selected.value,
                                     description: selected.text
                                 };
-                            } else if ( metadata[tableCell.fieldName].type.name == "combobox-yesno" ) {
+                            }
+                            else if ( metadata[tableCell.fieldName].type.name == "combobox-yesno" ) {
                                 var selected = this.options[this.selectedIndex];
                                 if ( selected.value == "true" ) {
                                     changedData[key] = true;
@@ -400,8 +427,10 @@
         setOnChange : function( input, tableCell ) {
 
             $(input).change(function( event ) {
-                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                var tableRow = $( event.target ).parents('tr')[0];
+                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+                //                var tableRow = $( event.target ).parents('tr')[0];
+                var metadata = $( tableCell ).findFirstParent('table').data('metadata');
+                var tableRow = $( event.target ).findFirstParent('tr')[0];
 
                 var model;
                 if ( tableRow.modified ) {
@@ -428,7 +457,8 @@
                                 changedData[key] = false;
                             }
 
-                        } else {
+                        }
+                        else {
                             changedData[key] = this.value;
                         }
                     }
@@ -439,8 +469,10 @@
         },
         builderProperInputElement : function( tableCell ) {
 
-            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            var tableRow = $(tableCell).parents('tr')[0];
+            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
+            //            var tableRow = $(tableCell).parents('tr')[0];
+            var metadata = $(tableCell).findFirstParent('table').data('metadata');
+            var tableRow = $(tableCell).findFirstParent('tr')[0];
             var model = tableRow.modified ? tableRow.modified : tableRow.model;
             var type = metadata[tableCell.fieldName].type;
 
@@ -466,8 +498,10 @@
                     $(this).datepicker( {
                         dateFormat : 'dd/mm/yy',
                         onSelect: function(dateText, inst) {
-                            var tableCell = $(this).parents('td')[0];
-                            var tableRow = $(this).parents('tr')[0];
+                            //                            var tableCell = $(this).parents('td')[0];
+                            //                            var tableRow = $(this).parents('tr')[0];
+                            var tableCell = $(this).findFirstParent('td')[0];
+                            var tableRow = $(this).findFirstParent('tr')[0];
                             var changedData = { } ;
                             for ( var key in model ) {
                                 changedData[key] = model[key];
@@ -481,7 +515,8 @@
                         onClose: function(dateText, inst) {
                             var tableCell
                             if (this) {
-                                tableCell = $(this).parents('td')[0];
+                                //                                tableCell = $(this).parents('td')[0];
+                                tableCell = $(this).findFirstParent('td')[0];
                                 manipulator.turnOffCellEditable(tableCell);
                             }
                         }
@@ -495,7 +530,8 @@
             else if ( type.name == "combobox" ) {
 
                 var relatedTableName = metadata[tableCell.fieldName].type.relatedTable;
-                var relatedTables = $($(tableCell).parents('table')[0]).data('relatedTables');
+                //                var relatedTables = $($(tableCell).parents('table')[0]).data('relatedTables');
+                var relatedTables = $(tableCell).findFirstParent('table').data('relatedTables');
                 var relatedTable = relatedTables[relatedTableName];
                 var select = builder.buildSelect();
                 var selectedIndex = 0;
@@ -712,6 +748,22 @@
             }
             return checkbox;
         },
+        buildSpan : function( id, className, value ) {
+            var span = document.createElement("span");
+            if ( id && id.length ) {
+                span.id = id;
+            }
+            if ( className && className.length ) {
+                span.className =+ className;
+            }
+            if ( value ) {
+                span.checked = value;
+                span.className = "ui-checkbox ui-checkbox-on";
+            } else {
+                span.className = "ui-checkbox ui-checkbox-off";
+            }
+            return span;
+        },
         buildSpecializedTableCell : function( metadata , data ) {
 
             if ( data == undefined )
@@ -724,7 +776,8 @@
             } else if ( metadata.type.name == "combobox-yesno" ) {
                 var value = data ? "Yes" : "No";
                 return builder.buildTableCell(null, null, value);
-            } else if ( metadata.type.name == "checkbox" ) {
+            }
+            else if ( metadata.type.name == "checkbox" ) {
                 var checkbox = builder.buildSpanCheckbox(null, null, data);
                 return builder.buildTableCell(null, null, checkbox);
             } else if (  metadata.type.name == "currency" ) {
@@ -829,7 +882,8 @@
         },
         sortField : function(thead) {
 
-            var table = $(thead).parents('table')[0];
+            //            var table = $(thead).parents('table')[0];
+            var table = $(thead).findFirstParent('table')[0];
             var metadata = $(table).data('metadata');
 
             if ( !metadata[thead.fieldName].sortable ) {
@@ -840,7 +894,8 @@
             var pairs = [];
             var value = null;
 
-            var tableHead = $(thead).parents('thead')[0];
+            //            var tableHead = $(thead).parents('thead')[0];
+            var tableHead = $(thead).findFirstParent('thead')[0];
 
             var tbody = $('tbody',table)[0];
 
@@ -908,11 +963,13 @@
 
                 if ( order == "sorted") {
                     pairs.sort(sorter.compareDates);
-                } else {
+                }
+                else {
                     pairs.reverse(sorter.compareDates);
                 }
 
-            } else if ( metadata[fieldName].type.name == "combobox-yesno" ) {
+            }
+            else if ( metadata[fieldName].type.name == "combobox-yesno" ) {
 
                 for ( var i = 0; i < tbody.rows.length; ++i ) {
                     var model = tbody.rows[i].modified ? tbody.rows[i].modified : tbody.rows[i].model;
@@ -952,7 +1009,8 @@
             $( settings.self ).live('click', function(event) {
                 var target = event.target;
                 if ( $(target).hasClass("removable") ) {
-                    manipulator.removeTableRow($(target).parents('tr')[0]);
+                    //                    manipulator.removeTableRow($(target).parents('tr')[0]);
+                    manipulator.removeTableRow($(target).findFirstParent('tr')[0]);
                 } else if (target.nodeName.toLowerCase() == "td") {
                     manipulator.turnCellEditable(target);
                 } else if ( target.nodeName.toLowerCase() == "th" ) {
@@ -1016,10 +1074,20 @@
         } else if ( typeof settings == "string" ) {
             if ( methods[settings] ) {
                 return methods[settings](this);
-            } else {
+            }
+            else {
                 return $.error( 'Method ' +  settings + ' does not exist on jQuery.jsTableComponent. ' );
             }
         }
     };
+    
+    $.fn.findFirstParent = function(nodeName) {
+        var parent = $(this).parent();
+        if ( parent == null || parent.length < 1 ) return null;
+        while ( $(parent).attr('nodeName').toLowerCase() != nodeName ) {
+            parent = $(parent).parent();
+        }
+        return parent;
+    }
 
 })( jQuery );
