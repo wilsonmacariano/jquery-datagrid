@@ -164,11 +164,22 @@
 
         },
         removeTableRow : function(tableRow) {
-            $(tableRow).remove();
-            //            manipulator.applyEvenAndOdd($(tableRow).parents('table')[0]);
-            var tableParent = $(tableRow).findFirstParent('table');
-            if ( tableParent && tableParent.length > 0 )
-                manipulator.applyEvenAndOdd(tableParent[0]);
+            $('#removeDialog').dialog({
+                title: "Information",
+                modal: true,
+                buttons : {
+                    Yes : function() {
+                        var tableParent = $(tableRow).findFirstParent('table');
+                        $(tableRow).remove();
+                        if ( tableParent && tableParent.length > 0 )
+                            manipulator.applyEvenAndOdd(tableParent[0]);
+                        $(this).dialog("close");
+                    },
+                    No : function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
         },
         applyEvenAndOdd : function(table) {
             var tbody = $(table).find('tbody')[0];
@@ -1009,7 +1020,6 @@
             $( settings.self ).live('click', function(event) {
                 var target = event.target;
                 if ( $(target).hasClass("removable") ) {
-                    //                    manipulator.removeTableRow($(target).parents('tr')[0]);
                     manipulator.removeTableRow($(target).findFirstParent('tr')[0]);
                 } else if (target.nodeName.toLowerCase() == "td") {
                     manipulator.turnCellEditable(target);
@@ -1039,10 +1049,41 @@
             }
 
             $(tbody).append( tableRow );
+        },
+        getRow : function( table , index ) {
+            return table[0].tBodies[0].rows[index];
+        }, 
+        deleteRow : function( table , index ) {
+            var tableRow = table[0].tBodies[0].rows[index];
+            $(tableRow).remove();
+            return tableRow;
+        },
+        getRowData : function ( table, index, type ) {
+            if (!type) type = "JSON";
+            var row = table[0].tBodies[0].rows[index];
+            return row.modified ? row.modified : row.model;
+        },
+        getRowsData : function( table, type ) {
+            var rows = [];
+            if (!type) type = "JSON";
+            for ( var i = 0; i < table[0].tBodies[0].rows.length; ++i ) {
+                rows.push(methods.getRowData(table, i));
+            }
+            return rows;            
+        },
+        getChangedRowsData : function( table, type ) {
+            var rows = [];
+            if (!type) type = "JSON";
+            for ( var i = 0; i < table[0].tBodies[0].rows.length; ++i ) {
+                var row = table[0].tBodies[0].rows[i];
+                if ( row.modified )
+                    rows.push(row.modified);
+            }
+            return rows;
         }
     }
 
-    $.fn.jsTableComponent = function( settings ) {
+    $.fn.jsTableComponent = function( a0 , a1 , a2 , a3 , a4 , a5 , a6 , a7 ) {
 
         var defaults = {
             self : this,
@@ -1054,8 +1095,8 @@
             rowsRemovable : true
         };
 
-        if ( typeof settings == "object" ) {
-            $.extend( defaults, settings );
+        if ( typeof a0 == "object" ) {
+            $.extend( defaults, a0 );
 
             if ( !defaults.metadata ) {
                 alert(alerts['missingMetadata']);
@@ -1071,12 +1112,12 @@
                 return methods.init.apply(this, [ defaults ]);
             }
 
-        } else if ( typeof settings == "string" ) {
-            if ( methods[settings] ) {
-                return methods[settings](this);
+        } else if ( typeof a0 == "string" ) {
+            if ( methods[a0] ) {
+                return methods[a0](this, a1, a2, a3, a4, a5, a6, a7);
             }
             else {
-                return $.error( 'Method ' +  settings + ' does not exist on jQuery.jsTableComponent. ' );
+                return $.error( 'Method ' +  a0 + ' does not exist on jQuery.jsTableComponent. ' );
             }
         }
     };
