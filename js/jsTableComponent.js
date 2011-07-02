@@ -7,8 +7,6 @@
 
     var navigator = {
         findNextEditableTableCell : function( tableCell ) {
-            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            //            var tableBody = $(tableCell).parents('tbody')[0];
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
             var tableBody = $(tableCell).findFirstParent('tbody')[0];
 
@@ -17,7 +15,6 @@
                 if ( nextTableCell.nextSibling ) {
                     nextTableCell = nextTableCell.nextSibling;
                 } else {
-                    //                    var tableRow = $(nextTableCell).parents('tr')[0];
                     var tableRow = $(nextTableCell).findFirstParent('tr')[0];
                     if ( tableRow.sectionRowIndex + 1 < tableBody.rows.length  ) {
                         nextTableCell = tableBody.rows[tableRow.sectionRowIndex + 1].cells[0];
@@ -31,8 +28,6 @@
 
         },
         findPreviousEditableTableCell : function(tableCell) {
-            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            //            var tableBody = $(tableCell).parents('tbody')[0];
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
             var tableBody = $(tableCell).findFirstParent('tbody')[0];
 
@@ -41,7 +36,6 @@
                 if ( previousTableCell.previousSibling ) {
                     previousTableCell = previousTableCell.previousSibling;
                 } else {
-                    //                    var tableRow = $(previousTableCell).parents('tr')[0];
                     var tableRow = $(previousTableCell).findFirstParent('tr')[0];
                     if ( tableRow.sectionRowIndex - 1 >= 0  ) {
                         var cellLength = tableBody.rows[tableRow.sectionRowIndex - 1].cells.length;
@@ -70,8 +64,6 @@
     var manipulator = {
         turnCellEditable : function( tableCell ) {
 
-            // get metadata from table
-            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
 
             // if this field is not editable, stop 'propagation'
@@ -83,7 +75,6 @@
                 return;
             }
 
-            //            var tableRow = $(tableCell).parents('tr')[0];
             var tableRow = $(tableCell).findFirstParent('tr')[0];
 
             // Clean the tableCell
@@ -111,8 +102,6 @@
 
             // Onchange
             $(input).change( function( event ) {
-                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                //                var tableRow = $( event.target ).parents('tr')[0];
                 var metadata = $( tableCell ).findFirstParent('table').data('metadata');
                 var tableRow = $( event.target ).findFirstParent('tr')[0];
 
@@ -199,8 +188,6 @@
             }
         },
         turnOffCellEditable : function( tableCell ) {
-            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            //            var tableRow = $(tableCell).parents('tr')[0];
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
             var tableRow = $(tableCell).findFirstParent('tr')[0];
 
@@ -226,7 +213,7 @@
                 tableCell.appendChild(cellContent);
             } else if ( metadata[tableCell.fieldName].type.name == "currency" ) {
                 cellContent = model[tableCell.fieldName];
-                tableCell.innerHTML = converter.decimalParaMoedaReal(cellContent);
+                tableCell.innerHTML = converter.decimalToCurrency(cellContent);
             }
 
             $(tableCell).removeClass("ui-selected-cell");
@@ -236,6 +223,7 @@
         build : function( settings ) {
             $(settings.self).append(manipulator.buildHeaders( settings ));
             $(settings.self).append(manipulator.buildBody( settings ));
+            $(settings.self).append(manipulator.buildTableFooter( settings ));
         },
         buildHeaders : function( settings ) {
             var table = settings.self;
@@ -277,11 +265,13 @@
             var data = settings.data;
             var rowsRemovable = settings.rowsRemovable;
             var tbody = builder.buildTableBody();
-
+            
             for ( var j = 0; j < data.length; ++j ) {
-
+                
                 var tableRow = manipulator.createRow(metadata, data[j], rowsRemovable);
-
+                
+                if ( j > settings.maxRowsPerPage-1 ) $(tableRow).css("display", "none");
+                
                 if ( j % 2 ) {
                     tableRow.className = "even";
                 }
@@ -294,6 +284,40 @@
             }
 
             return tbody;
+        },
+        buildTableFooter : function( settings ) {
+            var fieldsCount = $(settings.self).find('thead th').length;
+            var tfoot = builder.buildTableFoot();
+            var pagesCount = settings.data.length / settings.maxRowsPerPage;
+            var td = builder.buildTableCell();
+            td.setAttribute('colspan', fieldsCount );
+            
+            var arrowLeft = new builder.buildSpan(null, "pager", "<");
+            $(arrowLeft).button();
+            td.appendChild(arrowLeft);
+            
+            for ( var i = 0; i < pagesCount ; ++i ) {
+                var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
+                span.page = i;
+                $(span).button();
+                $(span).bind('click', function() {
+                    manipulator.moveToPage(settings.self, this.page);
+                });
+                if ( i == 0 ) {
+                    $(span).addClass('selected');
+                }
+                td.appendChild(span);
+            }
+            tfoot.appendChild(td);
+            
+            var arrowRight = new builder.buildSpan(null, "pager", ">");
+            $(arrowRight).button();
+            td.appendChild(arrowRight);
+            
+            settings.self.maxRowsPerPage = settings.self.maxRowsPerPage;
+            
+            return tfoot;
+            
         },
         createRow : function(metadata, data, rowsRemovable) {
             var tableRow = builder.buildTableRow();
@@ -319,12 +343,8 @@
 
                 var keynum = event.keyCode;
 
-                //                var tableCell = $(this).parents('td')[0];
                 var tableCell = $(this).findFirstParent('td')[0];
 
-                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                //                var tableRow = $( event.target ).parents('tr')[0];
-                //                var tbody = $(tableRow).parents('tbody')[0];
                 var metadata = $( tableCell ).findFirstParent('table').data('metadata');
                 var tableRow = $( event.target ).findFirstParent('tr')[0];
                 var tbody = $( tableRow ).findFirstParent('tbody')[0];
@@ -372,7 +392,7 @@
                         changedData[key] = model[key];
                         if ( key == tableCell.fieldName ) {
                             if ( metadata[tableCell.fieldName].type.name == "currency" ) {
-                                changedData[key] = converter.moedaRealParaDecimal(this.value);
+                                changedData[key] = converter.currencyToDecimal(this.value);
                             } else if ( metadata[tableCell.fieldName].type.name == "combobox" ) {
                                 var selected = this.options[this.selectedIndex];
                                 changedData[key] = {
@@ -388,7 +408,8 @@
                                     changedData[key] = false;
                                 }
 
-                            } else {
+                            }
+                            else {
                                 changedData[key] = this.value;
                             }
                         }
@@ -438,8 +459,6 @@
         setOnChange : function( input, tableCell ) {
 
             $(input).change(function( event ) {
-                //                var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-                //                var tableRow = $( event.target ).parents('tr')[0];
                 var metadata = $( tableCell ).findFirstParent('table').data('metadata');
                 var tableRow = $( event.target ).findFirstParent('tr')[0];
 
@@ -480,8 +499,6 @@
         },
         builderProperInputElement : function( tableCell ) {
 
-            //            var metadata = $($(tableCell).parents('table')[0]).data('metadata');
-            //            var tableRow = $(tableCell).parents('tr')[0];
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
             var tableRow = $(tableCell).findFirstParent('tr')[0];
             var model = tableRow.modified ? tableRow.modified : tableRow.model;
@@ -493,24 +510,22 @@
 
             } else if (type.name == "currency") {
 
-                var input = builder.buildInputText(null, null, converter.decimalParaMoedaReal(model[tableCell.fieldName]));
-                $(input).maskMoney({
+                var input = builder.buildInputText(null, null, converter.decimalToCurrency(model[tableCell.fieldName]));
+                
+                /*$(input).maskMoney({
                     symbol:"R$",
                     decimal:",",
                     thousands:"."
-                });
+                });*/
 
                 return input;
             } else if ( type.name == "date" ) {
 
                 var inputDate = builder.buildInputText(null, null, model[tableCell.fieldName]);
-                //$(inputDate).datepicker();
                 $(inputDate).click( function() {
                     $(this).datepicker( {
                         dateFormat : 'dd/mm/yy',
                         onSelect: function(dateText, inst) {
-                            //                            var tableCell = $(this).parents('td')[0];
-                            //                            var tableRow = $(this).parents('tr')[0];
                             var tableCell = $(this).findFirstParent('td')[0];
                             var tableRow = $(this).findFirstParent('tr')[0];
                             var changedData = { } ;
@@ -526,7 +541,6 @@
                         onClose: function(dateText, inst) {
                             var tableCell
                             if (this) {
-                                //                                tableCell = $(this).parents('td')[0];
                                 tableCell = $(this).findFirstParent('td')[0];
                                 manipulator.turnOffCellEditable(tableCell);
                             }
@@ -541,7 +555,6 @@
             else if ( type.name == "combobox" ) {
 
                 var relatedTableName = metadata[tableCell.fieldName].type.relatedTable;
-                //                var relatedTables = $($(tableCell).parents('table')[0]).data('relatedTables');
                 var relatedTables = $(tableCell).findFirstParent('table').data('relatedTables');
                 var relatedTable = relatedTables[relatedTableName];
                 var select = builder.buildSelect();
@@ -593,6 +606,18 @@
         },
         setInputData : function(  ) {
 
+        }, 
+        moveToPage : function( table, pageNumber ) {
+            var maxRowsPerPage = $(table).data('maxRowsPerPage');
+            var begin = ( ( pageNumber ) * maxRowsPerPage );
+            var end = begin + maxRowsPerPage;
+            var tableRows = $(table).find('tbody').find('tr');
+            for ( var i = 0 ; i < tableRows.length ; ++i ) {
+                tableRows[i].removeAttribute('style');
+                if ( !( i >= begin && i < end ) ) {
+                    $(tableRows[i]).css('display', 'none');
+                }
+            }
         }
 
     }
@@ -704,6 +729,23 @@
             }
             return tr;
         },
+        buildTableFoot : function(id, className, innerHTML) {
+            var tfoot = document.createElement("tfoot");
+            if ( id ) {
+                tfoot.id = id;
+            }
+            if ( className ) {
+                tfoot.className = className;
+            }
+            if ( innerHTML ) {
+                if ( typeof innerHTML =="object" ) {
+                    tfoot.appendChild(innerHTML);
+                } else {
+                    tfoot.innerHTML = innerHTML;
+                }
+            }
+            return tfoot;
+        },
         buildInputText : function(id, className, value, maxLength) {
             var inputText = document.createElement("input");
             inputText.type = "text";
@@ -759,19 +801,21 @@
             }
             return checkbox;
         },
-        buildSpan : function( id, className, value ) {
+        buildSpan : function( id, className, innerHTML ) {
             var span = document.createElement("span");
             if ( id && id.length ) {
                 span.id = id;
             }
             if ( className && className.length ) {
-                span.className =+ className;
+                span.className = className;
             }
-            if ( value ) {
-                span.checked = value;
-                span.className = "ui-checkbox ui-checkbox-on";
-            } else {
-                span.className = "ui-checkbox ui-checkbox-off";
+            if ( innerHTML ) {
+                if ( typeof innerHTML =="object" ) {
+                    span.appendChild(innerHTML);
+                } else {
+                    var x = document.createTextNode(innerHTML);
+                    span.appendChild(x);
+                }
             }
             return span;
         },
@@ -792,7 +836,7 @@
                 var checkbox = builder.buildSpanCheckbox(null, null, data);
                 return builder.buildTableCell(null, null, checkbox);
             } else if (  metadata.type.name == "currency" ) {
-                return builder.buildTableCell(null, null, converter.decimalParaMoedaReal( data) );
+                return builder.buildTableCell(null, null, converter.decimalToCurrency( data) );
             }
 
             return null;
@@ -802,41 +846,11 @@
 
 
     var converter = {
-        moedaRealParaDecimal : function( valorEmReal ) {
-            var index = valorEmReal.indexOf(",");
-            var decimals = valorEmReal.substr(index+1, 2);
-            var integer = valorEmReal.substr(0, index);
-
-            while ( integer.indexOf(".") >= 0 ) {
-                integer = integer.replace(".", "");
-            }
-
-            var number = integer + "." + decimals;
-            return number;
+        currencyToDecimal : function( num ) {
+            return num;
         },
-        decimalParaMoedaReal : function( num ) {
-            var x = 0;
-
-            if(num<0){
-                num = Math.abs(num);
-                x = 1;
-            }
-            if(isNaN(num)) num = "0";
-
-            var cents = Math.floor((num*100+0.5)%100);
-            num = Math.floor((num*100+0.5)/100).toString();
-
-            if(cents < 10) cents = "0" + cents;
-
-            for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++) {
-                num = num.substring(0,num.length-(4*i+3))+"."
-                +num.substring(num.length-(4*i+3));
-            }
-
-            var ret = num + "," + cents;
-            if (x == 1) ret = " ? " + ret;
-
-            return ret;
+        decimalToCurrency: function( num ) {
+            return num;
         }
     }
 
@@ -891,9 +905,8 @@
             }
             return 0;
         },
-        sortField : function(thead) {
-
-            //            var table = $(thead).parents('table')[0];
+        sortField : function( thead , settings ) {
+            
             var table = $(thead).findFirstParent('table')[0];
             var metadata = $(table).data('metadata');
 
@@ -905,7 +918,6 @@
             var pairs = [];
             var value = null;
 
-            //            var tableHead = $(thead).parents('thead')[0];
             var tableHead = $(thead).findFirstParent('thead')[0];
 
             var tbody = $('tbody',table)[0];
@@ -954,7 +966,8 @@
 
                 if ( order == "sorted") {
                     pairs.sort(sorter.compareStrings);
-                } else {
+                }
+                else {
                     pairs.reverse(sorter.compareStrings);
                 }
 
@@ -963,16 +976,12 @@
             else if ( metadata[fieldName].type.name == "date" ) {
 
                 for ( var i = 0; i < tbody.rows.length; ++i ) {
-
                     var model = tbody.rows[i].modified ? tbody.rows[i].modified : tbody.rows[i].model;
-
                     value = model[fieldName];
-
                     pairs.push( new sorter.pair( new Date(value.substr(6, 4), value.substr(3, 2)-1, value.substr(0, 2) ) , tbody.rows[i] ) );
-
                 }
 
-                if ( order == "sorted") {
+                if ( order == "sorted" ) {
                     pairs.sort(sorter.compareDates);
                 }
                 else {
@@ -997,6 +1006,11 @@
             }
 
             for ( var j = 0 ; j < pairs.length ; ++j ) {
+                if (j > settings.maxRowsPerPage-1 ) {
+                    $(pairs[j].row).css('display','none') 
+                } else {
+                    pairs[j].row.removeAttribute('style') ;
+                }
                 tbody.appendChild(pairs[j].row);
             }
 
@@ -1013,18 +1027,27 @@
 
     var methods = {
         init : function( settings ) {
+            
+            if ( settings.decimalToCurrency ) {
+                converter.decimalToCurrency = settings.decimalToCurrency;
+            }
+            if ( settings.currencyToDecimal ) {
+                converter.currencyToDecimal = settings.currencyToDecimal ;
+            }
+            
             manipulator.build( settings );
             $( settings.self ).data( 'metadata', settings.metadata );
             $( settings.self ).data( 'relatedTables', settings.relatedTables );
             $( settings.self ).data( 'rowsRemovable', settings.rowsRemovable );
-            $( settings.self ).live('click', function(event) {
+            $( settings.self ).data( 'maxRowsPerPage', settings.maxRowsPerPage );
+            $( settings.self ).live( 'click', function(event) {
                 var target = event.target;
                 if ( $(target).hasClass("removable") ) {
                     manipulator.removeTableRow($(target).findFirstParent('tr')[0]);
                 } else if (target.nodeName.toLowerCase() == "td") {
                     manipulator.turnCellEditable(target);
                 } else if ( target.nodeName.toLowerCase() == "th" ) {
-                    sorter.sortField(target);
+                    sorter.sortField( target, settings );
                 }
             });
         },
@@ -1092,7 +1115,8 @@
             relatedTables : null,
             headerStyle : 1,
             tableBodyStyle : 1,
-            rowsRemovable : true
+            rowsRemovable : true,
+            maxRowsPerPage : 50
         };
 
         if ( typeof a0 == "object" ) {

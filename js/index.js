@@ -159,16 +159,58 @@ var relatedTables = {
     } ]
 };
 
+currencyToDecimal = function( valorEmReal ) {
+    var index = valorEmReal.indexOf(",");
+    var decimals = valorEmReal.substr(index+1, 2);
+    var integer = valorEmReal.substr(0, index);
+
+    while ( integer.indexOf(".") >= 0 ) {
+        integer = integer.replace(".", "");
+    }
+
+    var number = integer + "." + decimals;
+    return number;
+}
+    
+decimalToCurrency = function( num ) {
+    var x = 0;
+
+    if(num<0){
+        num = Math.abs(num);
+        x = 1;
+    }
+    if(isNaN(num)) num = "0";
+
+    var cents = Math.floor((num*100+0.5)%100);
+    num = Math.floor((num*100+0.5)/100).toString();
+
+    if(cents < 10) cents = "0" + cents;
+
+    for (var i = 0; i < Math.floor((num.length-(1+i))/3); i++) {
+        num = num.substring(0,num.length-(4*i+3))+"."
+        +num.substring(num.length-(4*i+3));
+    }
+
+    var ret = num + "," + cents;
+    if (x == 1) ret = " ? " + ret;
+
+    return ret;
+}
+
 $("#tableComponent").jsTableComponent({
     metadata : metadata,
     data: data,
     relatedTables : relatedTables,
-    headerStyle: 2
+    headerStyle: 2,
+    currencyToDecimal : currencyToDecimal,
+    decimalToCurrency : decimalToCurrency,
+    maxRowsPerPage: 3
 });
 
 $("#destroy").click( function() {
     $("#tableComponent").jsTableComponent('destroy');
 } );
+
 
 $("#tableComponent2").jsTableComponent( {
     metadata : metadata,
