@@ -122,7 +122,8 @@
                                 id: selected.value,
                                 description: selected.text
                             };
-                        } else if ( metadata[tableCell.fieldName].type.name == "combobox-yesno" ) {
+                        }
+                        else if ( metadata[tableCell.fieldName].type.name == "combobox-yesno" ) {
                             var selected = this.options[this.selectedIndex];
                             if ( selected.value == "true" ) {
                                 changedData[key] = true;
@@ -286,31 +287,66 @@
             return tbody;
         },
         buildTableFooter : function( settings ) {
+            
             var fieldsCount = $(settings.self).find('thead th').length;
             var tfoot = builder.buildTableFoot();
-            var pagesCount = settings.data.length / settings.maxRowsPerPage;
+            var pagesCount = Math.floor(settings.data.length / settings.maxRowsPerPage);
+            $(settings.self).data('pagesCount', pagesCount);
             var td = builder.buildTableCell();
             td.setAttribute('colspan', fieldsCount );
             
-            var arrowLeft = new builder.buildSpan(null, "pager", "<");
+            var arrowLeft = new builder.buildSpan(null, null, "<");
             $(arrowLeft).button();
             td.appendChild(arrowLeft);
             
-            for ( var i = 0; i < pagesCount ; ++i ) {
-                var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
-                span.page = i;
-                $(span).button();
-                $(span).bind('click', function() {
-                    manipulator.moveToPage(settings.self, this.page);
-                });
-                if ( i == 0 ) {
-                    $(span).addClass('selected');
+            if ( ( pagesCount > settings.maxPagerItems ) || ( pagesCount > 7 ) ) {
+                
+                for ( var i = 0; i < pagesCount ; ++i ) {
+                    
+                    if ( i == 1 ) { // After first pager, add '..'
+                        var ddleft = new builder.buildSpan(null, 'left-dd', '..');
+                        td.appendChild(ddleft);
+                        $(ddleft).css('display', 'none');
+                    } else if ( i == pagesCount-1 ) { // Before last pager, add '..'
+                        var ddright = new builder.buildSpan(null, 'right-dd', '..');
+                        td.appendChild(ddright);
+                    //                        $(ddright).css('display', 'none');
+                    }
+                    
+                    var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
+                    span.page = i;
+                    $(span).button();
+                    $(span).bind('click', function() {
+                        manipulator.moveToPage(settings.self, this.page);
+                    });
+                    if ( i == 0 ) {
+                        $(span).addClass('selected');
+                    }
+                    if ( i > ( settings.maxPagerItems - 2 ) && ( i != pagesCount-1 ) ) {
+                        $(span).css('display', 'none');
+                    }
+                    td.appendChild(span);
                 }
-                td.appendChild(span);
+                
+            } else {
+                
+                for ( var i = 0; i < pagesCount ; ++i ) {
+                    var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
+                    span.page = i;
+                    $(span).button();
+                    $(span).bind('click', function() {
+                        manipulator.moveToPage(settings.self, this.page);
+                    });
+                    if ( i == 0 ) {
+                        $(span).addClass('selected');
+                    }
+                    td.appendChild(span);
+                }
+                
             }
             tfoot.appendChild(td);
             
-            var arrowRight = new builder.buildSpan(null, "pager", ">");
+            var arrowRight = new builder.buildSpan(null, null, ">");
             $(arrowRight).button();
             td.appendChild(arrowRight);
             
@@ -608,9 +644,17 @@
 
         }, 
         moveToPage : function( table, pageNumber ) {
+            
             var maxRowsPerPage = $(table).data('maxRowsPerPage');
-            var begin = ( ( pageNumber ) * maxRowsPerPage );
+            var maxPagerItems = $(table).data('maxPagerItems');
+            var pagesCount = $(table).data('pagesCount');
+            
+            var begin = pageNumber * maxRowsPerPage ;
             var end = begin + maxRowsPerPage;
+            
+            var rightSide = Math.floor( ( ( maxPagerItems / 2 ) -1 ) );
+            var leftSide = Math.floor(( ( maxPagerItems / 2 ) -1 ) );
+            
             var tableRows = $(table).find('tbody').find('tr');
             for ( var i = 0 ; i < tableRows.length ; ++i ) {
                 tableRows[i].removeAttribute('style');
@@ -618,6 +662,40 @@
                     $(tableRows[i]).css('display', 'none');
                 }
             }
+            
+            var pagerItems = $(table).find('tfoot .pager');
+            if ( pageNumber > leftSide + 1 ) {
+                $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
+            } else {
+                $(table).find('tfoot').find('.left-dd').css('display', 'none');
+                rightSide += (leftSide+1-pageNumber);
+            }
+            
+            if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
+                $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
+            } else {
+                $(table).find('tfoot').find('.right-dd').css('display', 'none');
+                leftSide += (rightSide+1-(pagesCount-(pageNumber+1)));
+            }
+            
+            var ha = pageNumber - leftSide - 1;
+            for ( var left = pageNumber ; left > 0 ; --left ) {
+                if ( left > ha ) {
+                    pagerItems[left].removeAttribute('style');
+                } else {
+                    $(pagerItems[left]).css('display', 'none');
+                }
+            }
+            
+            var he = pageNumber + rightSide ;
+            for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
+                if ( right <= he) {
+                    pagerItems[right].removeAttribute('style');
+                } else {
+                    $(pagerItems[right]).css('display', 'none');
+                }
+            }
+            
         }
 
     }
@@ -1040,6 +1118,7 @@
             $( settings.self ).data( 'relatedTables', settings.relatedTables );
             $( settings.self ).data( 'rowsRemovable', settings.rowsRemovable );
             $( settings.self ).data( 'maxRowsPerPage', settings.maxRowsPerPage );
+            $( settings.self ).data( 'maxPagerItems', settings.maxPagerItems );
             $( settings.self ).live( 'click', function(event) {
                 var target = event.target;
                 if ( $(target).hasClass("removable") ) {
@@ -1116,7 +1195,8 @@
             headerStyle : 1,
             tableBodyStyle : 1,
             rowsRemovable : true,
-            maxRowsPerPage : 50
+            maxRowsPerPage : 50,
+            maxPagerItems : 7
         };
 
         if ( typeof a0 == "object" ) {

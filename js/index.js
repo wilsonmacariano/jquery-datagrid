@@ -145,6 +145,336 @@ var data = [ {
     date: "03/02/2011",
     masterDegree : true,
     dinheiro : 352.69
+},
+{
+    id: 9,
+    name: "Eveline Soares",
+    sex: {
+        id: 1,
+        description: "Feminino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 10,
+    name: "Genilson Marcal",
+    sex: {
+        id: 2,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 11,
+    name: "Katyúscia",
+    sex: {
+        id: 2,
+        description: "Feminino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 12,
+    name: "Fatima Bernardes",
+    sex: {
+        id: 2,
+        description: "Feminino"
+    },
+    date: "02/12/2011",
+    masterDegree : true,
+    dinheiro : 681681.69
+},
+{
+    id: 13,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 14,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 15,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 16,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 17,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 18,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 19,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 20,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 21,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 22,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 23,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 24,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 25,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 26,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 27,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 28,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 29,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 30,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 31,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 32,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 33,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 34,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 35,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 36,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 37,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
+},
+{
+    id: 38,
+    name: "Hiarlay Araujo Rolim Tur",
+    sex: {
+        id: 1,
+        description: "Masculino"
+    },
+    date: "03/02/2011",
+    masterDegree : true,
+    dinheiro : 352.69
 } ];
 
 var relatedTables = {
@@ -204,7 +534,8 @@ $("#tableComponent").jsTableComponent({
     headerStyle: 2,
     currencyToDecimal : currencyToDecimal,
     decimalToCurrency : decimalToCurrency,
-    maxRowsPerPage: 3
+    maxRowsPerPage: 3,
+    maxPagerItems: 9
 });
 
 $("#destroy").click( function() {
