@@ -657,7 +657,8 @@
             
             var tableRows = $(table).find('tbody').find('tr');
             for ( var i = 0 ; i < tableRows.length ; ++i ) {
-                tableRows[i].removeAttribute('style');
+//                 tableRows[i].removeAttribute('style');
+		$(tableRows[i]).attr('style','');
                 if ( !( i >= begin && i < end ) ) {
                     $(tableRows[i]).css('display', 'none');
                 }
@@ -665,14 +666,16 @@
             
             var pagerItems = $(table).find('tfoot .pager');
             if ( pageNumber > leftSide + 1 ) {
-                $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
+//                 $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
+		$(table).find('tfoot').find('.left-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.left-dd').css('display', 'none');
                 rightSide += (leftSide+1-pageNumber);
             }
             
             if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
-                $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
+//                 $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
+		$(table).find('tfoot').find('.right-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.right-dd').css('display', 'none');
                 leftSide += (rightSide+1-(pagesCount-(pageNumber+1)));
@@ -681,7 +684,8 @@
             var ha = pageNumber - leftSide - 1;
             for ( var left = pageNumber ; left > 0 ; --left ) {
                 if ( left > ha ) {
-                    pagerItems[left].removeAttribute('style');
+//                     pagerItems[left].removeAttribute('style');
+		    $(pagerItems[left]).attr('style','');
                 } else {
                     $(pagerItems[left]).css('display', 'none');
                 }
@@ -690,12 +694,24 @@
             var he = pageNumber + rightSide ;
             for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
                 if ( right <= he) {
-                    pagerItems[right].removeAttribute('style');
+//                     pagerItems[right].removeAttribute('style');
+		    $(pagerItems[right]).attr('style','');
                 } else {
                     $(pagerItems[right]).css('display', 'none');
                 }
             }
             
+            manipulator.clearPagerStatusAndApplySelected( pagerItems, pageNumber );
+            
+        }, 
+        clearPagerStatusAndApplySelected : function ( pagerItems , pageNumber ) {
+            for ( var i = 0 ; i < pagerItems.length ; ++i ) {
+                if ( i != pageNumber && $(pagerItems[0]).hasClass('selected') ) {
+                    $(pagerItems[i]).removeClass('selected');
+                } else if ( i == pageNumber ) {
+                    $(pagerItems[i]).addClass('selected');
+                }
+            }
         }
 
     }
@@ -1087,7 +1103,8 @@
                 if (j > settings.maxRowsPerPage-1 ) {
                     $(pairs[j].row).css('display','none') 
                 } else {
-                    pairs[j].row.removeAttribute('style') ;
+//                     pairs[j].row.removeAttribute('style') ;
+		    $(pairs[j].row).attr('style','') ;
                 }
                 tbody.appendChild(pairs[j].row);
             }
@@ -1099,7 +1116,11 @@
             } else {
                 thead.className = thead.className.concat("rsorted");
             }
-
+            
+            var pagerItem = $(table).find(".selected")[0];
+            if ( pagerItem ) {
+                manipulator.moveToPage(table, pagerItem.page);
+            }
         }
     }
 
@@ -1171,7 +1192,7 @@
             for ( var i = 0; i < table[0].tBodies[0].rows.length; ++i ) {
                 rows.push(methods.getRowData(table, i));
             }
-            return rows;            
+            return rows;
         },
         getChangedRowsData : function( table, type ) {
             var rows = [];

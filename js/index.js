@@ -192,34 +192,34 @@ var data = [ {
 },
 {
     id: 13,
-    name: "Hiarlay Araujo Rolim Tur",
+    name: "Luiz Inacio Lula da Silva",
     sex: {
         id: 1,
         description: "Masculino"
     },
-    date: "03/02/2011",
+    date: "03/02/1950",
     masterDegree : true,
     dinheiro : 352.69
 },
 {
     id: 14,
-    name: "Hiarlay Araujo Rolim Tur",
+    name: "Gepeto Pai do Pinochio",
     sex: {
         id: 1,
         description: "Masculino"
     },
-    date: "03/02/2011",
+    date: "12/08/1839",
     masterDegree : true,
     dinheiro : 352.69
 },
 {
     id: 15,
-    name: "Hiarlay Araujo Rolim Tur",
+    name: "Linus Tovards",
     sex: {
         id: 1,
         description: "Masculino"
     },
-    date: "03/02/2011",
+    date: "22/07/1972",
     masterDegree : true,
     dinheiro : 352.69
 },
@@ -535,7 +535,7 @@ $("#tableComponent").jsTableComponent({
     currencyToDecimal : currencyToDecimal,
     decimalToCurrency : decimalToCurrency,
     maxRowsPerPage: 3,
-    maxPagerItems: 9
+    maxPagerItems: 7
 });
 
 $("#destroy").click( function() {
