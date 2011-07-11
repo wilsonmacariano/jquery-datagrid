@@ -290,13 +290,22 @@
             
             var fieldsCount = $(settings.self).find('thead th').length;
             var tfoot = builder.buildTableFoot();
-            var pagesCount = Math.floor(settings.data.length / settings.maxRowsPerPage);
+            var pagesCount = Math.floor(settings.data.length / settings.maxRowsPerPage) + 1;
             $(settings.self).data('pagesCount', pagesCount);
             var td = builder.buildTableCell();
             td.setAttribute('colspan', fieldsCount );
             
             var arrowLeft = new builder.buildSpan(null, null, "<");
             $(arrowLeft).button();
+            $(arrowLeft).bind('click', function() {
+                
+                var selectedPage = $(this).siblings('.selected')[0].page;
+                var table = $(this).findFirstParent('table');
+                if ( selectedPage > 0 )
+                    manipulator.moveToPage(table, selectedPage-1);
+                
+                
+            });
             td.appendChild(arrowLeft);
             
             if ( ( pagesCount > settings.maxPagerItems ) || ( pagesCount > 7 ) ) {
@@ -348,6 +357,14 @@
             
             var arrowRight = new builder.buildSpan(null, null, ">");
             $(arrowRight).button();
+            $(arrowRight).bind('click', function() {
+                var selectedPage = $(this).siblings('.selected')[0].page;
+                var table = $(this).findFirstParent('table');
+                var pagersCount = $(table).find('.pager').length;
+                if ( selectedPage < pagersCount-1 )
+                    manipulator.moveToPage(table, selectedPage+1);
+                
+            });
             td.appendChild(arrowRight);
             
             settings.self.maxRowsPerPage = settings.self.maxRowsPerPage;
@@ -657,8 +674,8 @@
             
             var tableRows = $(table).find('tbody').find('tr');
             for ( var i = 0 ; i < tableRows.length ; ++i ) {
-//                 tableRows[i].removeAttribute('style');
-		$(tableRows[i]).attr('style','');
+                //                 tableRows[i].removeAttribute('style');
+                $(tableRows[i]).attr('style','');
                 if ( !( i >= begin && i < end ) ) {
                     $(tableRows[i]).css('display', 'none');
                 }
@@ -666,16 +683,16 @@
             
             var pagerItems = $(table).find('tfoot .pager');
             if ( pageNumber > leftSide + 1 ) {
-//                 $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
-		$(table).find('tfoot').find('.left-dd').attr('style','');
+                //                 $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
+                $(table).find('tfoot').find('.left-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.left-dd').css('display', 'none');
                 rightSide += (leftSide+1-pageNumber);
             }
             
             if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
-//                 $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
-		$(table).find('tfoot').find('.right-dd').attr('style','');
+                //                 $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
+                $(table).find('tfoot').find('.right-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.right-dd').css('display', 'none');
                 leftSide += (rightSide+1-(pagesCount-(pageNumber+1)));
@@ -684,8 +701,8 @@
             var ha = pageNumber - leftSide - 1;
             for ( var left = pageNumber ; left > 0 ; --left ) {
                 if ( left > ha ) {
-//                     pagerItems[left].removeAttribute('style');
-		    $(pagerItems[left]).attr('style','');
+                    //                     pagerItems[left].removeAttribute('style');
+                    $(pagerItems[left]).attr('style','');
                 } else {
                     $(pagerItems[left]).css('display', 'none');
                 }
@@ -694,8 +711,8 @@
             var he = pageNumber + rightSide ;
             for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
                 if ( right <= he) {
-//                     pagerItems[right].removeAttribute('style');
-		    $(pagerItems[right]).attr('style','');
+                    //                     pagerItems[right].removeAttribute('style');
+                    $(pagerItems[right]).attr('style','');
                 } else {
                     $(pagerItems[right]).css('display', 'none');
                 }
@@ -706,7 +723,7 @@
         }, 
         clearPagerStatusAndApplySelected : function ( pagerItems , pageNumber ) {
             for ( var i = 0 ; i < pagerItems.length ; ++i ) {
-                if ( i != pageNumber && $(pagerItems[0]).hasClass('selected') ) {
+                if ( i != pageNumber && $(pagerItems[i]).hasClass('selected') ) {
                     $(pagerItems[i]).removeClass('selected');
                 } else if ( i == pageNumber ) {
                     $(pagerItems[i]).addClass('selected');
@@ -1103,8 +1120,8 @@
                 if (j > settings.maxRowsPerPage-1 ) {
                     $(pairs[j].row).css('display','none') 
                 } else {
-//                     pairs[j].row.removeAttribute('style') ;
-		    $(pairs[j].row).attr('style','') ;
+                    //                     pairs[j].row.removeAttribute('style') ;
+                    $(pairs[j].row).attr('style','') ;
                 }
                 tbody.appendChild(pairs[j].row);
             }
