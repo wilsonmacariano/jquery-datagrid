@@ -527,6 +527,8 @@ decimalToCurrency = function( num ) {
     return ret;
 }
 
+var trash = [];
+
 $("#tableComponent").jsTableComponent({
     metadata : metadata,
     data: data,
@@ -535,7 +537,8 @@ $("#tableComponent").jsTableComponent({
     currencyToDecimal : currencyToDecimal,
     decimalToCurrency : decimalToCurrency,
     maxRowsPerPage: 3,
-    maxPagerItems: 7
+    maxPagerItems: 7,
+    trashArray : trash
 });
 
 $("#destroy").click( function() {

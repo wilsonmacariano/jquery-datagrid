@@ -6,7 +6,18 @@
     }
 
     var navigator = {
+        hasDisplayNone : function(tableRow) {
+            if ( tableRow.getAttribute("style") ) {
+                var style = tableRow.getAttribute("style").replace(" ", "");
+                var index = style.search(/display:none/i);
+                if ( index > -1 ) {
+                    return true;
+                }
+            }
+            return false;
+        },
         findNextEditableTableCell : function( tableCell ) {
+            
             var metadata = $(tableCell).findFirstParent('table').data('metadata');
             var tableBody = $(tableCell).findFirstParent('tbody')[0];
 
@@ -16,7 +27,8 @@
                     nextTableCell = nextTableCell.nextSibling;
                 } else {
                     var tableRow = $(nextTableCell).findFirstParent('tr')[0];
-                    if ( tableRow.sectionRowIndex + 1 < tableBody.rows.length  ) {
+                    if ( tableRow.sectionRowIndex + 1 < tableBody.rows.length &&
+                        !navigator.hasDisplayNone(tableBody.rows[tableRow.sectionRowIndex + 1]) ) {
                         nextTableCell = tableBody.rows[tableRow.sectionRowIndex + 1].cells[0];
                     } else {
                         nextTableCell = null;
@@ -37,7 +49,8 @@
                     previousTableCell = previousTableCell.previousSibling;
                 } else {
                     var tableRow = $(previousTableCell).findFirstParent('tr')[0];
-                    if ( tableRow.sectionRowIndex - 1 >= 0  ) {
+                    if ( tableRow.sectionRowIndex - 1 >= 0  && 
+                        !navigator.hasDisplayNone(tableBody.rows[tableRow.sectionRowIndex - 1])) {
                         var cellLength = tableBody.rows[tableRow.sectionRowIndex - 1].cells.length;
                         previousTableCell = tableBody.rows[tableRow.sectionRowIndex - 1].cells[cellLength-1];
                     } else {
@@ -160,10 +173,18 @@
                 buttons : {
                     Yes : function() {
                         var tableParent = $(tableRow).findFirstParent('table');
+                        
+                        // Move to trash
+                        tableParent[0].trashArray.push(tableRow.modified ? tableRow.modified : tableRow.model);
+                        
                         $(tableRow).remove();
                         if ( tableParent && tableParent.length > 0 )
                             manipulator.applyEvenAndOdd(tableParent[0]);
                         $(this).dialog("close");
+                        
+                        var selectedPagerItem = $(tableParent).find('tfoot .selected')[0].page;
+                        manipulator.moveToPage(tableParent, selectedPagerItem);
+                        
                     },
                     No : function() {
                         $(this).dialog("close");
@@ -474,8 +495,9 @@
                 if ( metadata[tableCell.fieldName].type.name != "combobox" &&
                     metadata[tableCell.fieldName].type.name != "combobox-yesno" ) {
                     if ( keynum == 40 ) {  // Down Arrow
-
-                        if ( tableRow.sectionRowIndex + 1 > tbody.rows.length - 1 ) {
+                        
+                        if ( !( tableRow.sectionRowIndex + 1 > tbody.rows.length - 1 ) &&
+                            navigator.hasDisplayNone(tbody.rows[tableRow.sectionRowIndex + 1] ) ) {
                             return;
                         }
 
@@ -674,7 +696,6 @@
             
             var tableRows = $(table).find('tbody').find('tr');
             for ( var i = 0 ; i < tableRows.length ; ++i ) {
-                //                 tableRows[i].removeAttribute('style');
                 $(tableRows[i]).attr('style','');
                 if ( !( i >= begin && i < end ) ) {
                     $(tableRows[i]).css('display', 'none');
@@ -683,7 +704,6 @@
             
             var pagerItems = $(table).find('tfoot .pager');
             if ( pageNumber > leftSide + 1 ) {
-                //                 $(table).find('tfoot').find('.left-dd')[0].removeAttribute('style');
                 $(table).find('tfoot').find('.left-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.left-dd').css('display', 'none');
@@ -691,7 +711,6 @@
             }
             
             if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
-                //                 $(table).find('tfoot').find('.right-dd')[0].removeAttribute('style');
                 $(table).find('tfoot').find('.right-dd').attr('style','');
             } else {
                 $(table).find('tfoot').find('.right-dd').css('display', 'none');
@@ -701,7 +720,6 @@
             var ha = pageNumber - leftSide - 1;
             for ( var left = pageNumber ; left > 0 ; --left ) {
                 if ( left > ha ) {
-                    //                     pagerItems[left].removeAttribute('style');
                     $(pagerItems[left]).attr('style','');
                 } else {
                     $(pagerItems[left]).css('display', 'none');
@@ -711,7 +729,6 @@
             var he = pageNumber + rightSide ;
             for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
                 if ( right <= he) {
-                    //                     pagerItems[right].removeAttribute('style');
                     $(pagerItems[right]).attr('style','');
                 } else {
                     $(pagerItems[right]).css('display', 'none');
@@ -1157,6 +1174,9 @@
             $( settings.self ).data( 'rowsRemovable', settings.rowsRemovable );
             $( settings.self ).data( 'maxRowsPerPage', settings.maxRowsPerPage );
             $( settings.self ).data( 'maxPagerItems', settings.maxPagerItems );
+            
+            settings.self[0].trashArray = settings.trashArray;
+            
             $( settings.self ).live( 'click', function(event) {
                 var target = event.target;
                 if ( $(target).hasClass("removable") ) {
@@ -1234,7 +1254,8 @@
             tableBodyStyle : 1,
             rowsRemovable : true,
             maxRowsPerPage : 50,
-            maxPagerItems : 7
+            maxPagerItems : 7,
+            trashArray : null
         };
 
         if ( typeof a0 == "object" ) {
