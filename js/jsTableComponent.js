@@ -178,12 +178,36 @@
                         tableParent[0].trashArray.push(tableRow.modified ? tableRow.modified : tableRow.model);
                         
                         $(tableRow).remove();
-                        if ( tableParent && tableParent.length > 0 )
+                        if ( tableParent && tableParent.length > 0 ) {
                             manipulator.applyEvenAndOdd(tableParent[0]);
+                        }                        
                         $(this).dialog("close");
                         
-                        var selectedPagerItem = $(tableParent).find('tfoot .selected')[0].page;
-                        manipulator.moveToPage(tableParent, selectedPagerItem);
+                        var comp = pager.compareCurrentNewCount( tableParent[0] ) ;
+                        
+                        if ( comp > 0 ) {
+                            for ( var i = 0 ; i < comp ; ++i ) {
+                                var last = $(tableParent).find('.pager:last');
+                                if ( $(last).hasClass('selected') ) {
+                                    var pageNumber = last[0].page;
+                                    $(last).remove();
+                                    pager.moveToPage(tableParent, pageNumber);
+                                } else {
+                                    $(last).remove();
+                                    last = $(tableParent).find('.pager:last');
+                                    $(last).attr('style','');
+                                    $(tableParent).find('tfoot .right-dd').after(last);
+                                }
+                                
+                            }
+                        }
+                        
+                        var selectedPagerItem = $(tableParent).find('tfoot .selected');
+                        if ( selectedPagerItem && selectedPagerItem.length > 0 ) {
+                            pager.moveToPage(tableParent, selectedPagerItem[0].page);
+                        } else {
+                            pager.moveToPage(tableParent, $(tableParent).find('.pager:last')[0].page);
+                        }
                         
                     },
                     No : function() {
@@ -289,50 +313,34 @@
             var tbody = builder.buildTableBody();
             
             for ( var j = 0; j < data.length; ++j ) {
-                
                 var tableRow = manipulator.createRow(metadata, data[j], rowsRemovable);
-                
                 if ( j > settings.maxRowsPerPage-1 ) $(tableRow).css("display", "none");
-                
                 if ( j % 2 ) {
                     tableRow.className = "even";
                 }
                 else {
                     tableRow.className = "odd";
                 }
-
                 tableRow.model = data[j];
                 tbody.appendChild(tableRow);
             }
-
+            
             return tbody;
         },
         buildTableFooter : function( settings ) {
             
             var fieldsCount = $(settings.self).find('thead th').length;
             var tfoot = builder.buildTableFoot();
-            var pagesCount = Math.floor(settings.data.length / settings.maxRowsPerPage) + 1;
-            $(settings.self).data('pagesCount', pagesCount);
+            var pagesCount = pager.countNeededPagerItems(settings.data.length, settings.maxRowsPerPage);
             var td = builder.buildTableCell();
             td.setAttribute('colspan', fieldsCount );
             
-            var arrowLeft = new builder.buildSpan(null, null, "<");
+            var arrowLeft = new builder.buildSpan(null, 'left-arrow', "<");
             $(arrowLeft).button();
-            $(arrowLeft).bind('click', function() {
-                
-                var selectedPage = $(this).siblings('.selected')[0].page;
-                var table = $(this).findFirstParent('table');
-                if ( selectedPage > 0 )
-                    manipulator.moveToPage(table, selectedPage-1);
-                
-                
-            });
             td.appendChild(arrowLeft);
             
             if ( ( pagesCount > settings.maxPagerItems ) || ( pagesCount > 7 ) ) {
-                
                 for ( var i = 0; i < pagesCount ; ++i ) {
-                    
                     if ( i == 1 ) { // After first pager, add '..'
                         var ddleft = new builder.buildSpan(null, 'left-dd', '..');
                         td.appendChild(ddleft);
@@ -340,15 +348,8 @@
                     } else if ( i == pagesCount-1 ) { // Before last pager, add '..'
                         var ddright = new builder.buildSpan(null, 'right-dd', '..');
                         td.appendChild(ddright);
-                    //                        $(ddright).css('display', 'none');
                     }
-                    
-                    var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
-                    span.page = i;
-                    $(span).button();
-                    $(span).bind('click', function() {
-                        manipulator.moveToPage(settings.self, this.page);
-                    });
+                    var span = pager.buildPagerItem(i);
                     if ( i == 0 ) {
                         $(span).addClass('selected');
                     }
@@ -357,38 +358,43 @@
                     }
                     td.appendChild(span);
                 }
-                
             } else {
-                
                 for ( var i = 0; i < pagesCount ; ++i ) {
-                    var span = builder.buildSpan(null, 'pager page-count-'.concat(i), i+1);
-                    span.page = i;
-                    $(span).button();
-                    $(span).bind('click', function() {
-                        manipulator.moveToPage(settings.self, this.page);
-                    });
+                    var span = pager.buildPagerItem(i);
                     if ( i == 0 ) {
                         $(span).addClass('selected');
                     }
                     td.appendChild(span);
                 }
-                
             }
             tfoot.appendChild(td);
             
-            var arrowRight = new builder.buildSpan(null, null, ">");
+            var arrowRight = new builder.buildSpan(null, 'right-arrow', ">");
             $(arrowRight).button();
-            $(arrowRight).bind('click', function() {
-                var selectedPage = $(this).siblings('.selected')[0].page;
-                var table = $(this).findFirstParent('table');
-                var pagersCount = $(table).find('.pager').length;
-                if ( selectedPage < pagersCount-1 )
-                    manipulator.moveToPage(table, selectedPage+1);
-                
-            });
             td.appendChild(arrowRight);
             
             settings.self.maxRowsPerPage = settings.self.maxRowsPerPage;
+            $(settings.self).find('tfoot').live('click', function(event) {
+                var span = $(event.target);
+                if ( !$(span).hasClass('pager') && !$(span).hasClass('left-dd')
+                    && !$(span).hasClass('left-dd')  ) {
+                    span = $(span).findFirstParent('span');
+                }
+                var table = $(this).findFirstParent('table');
+                if ( $(span).hasClass('pager') ) {
+                    var pageNumber = span[0].page;
+                    pager.moveToPage(table, pageNumber);
+                } else if ( $(span).hasClass('left-arrow') ) {
+                    var selectedPage = $(span).siblings('.selected')[0].page;
+                    if ( selectedPage > 0 )
+                        pager.moveToPage(table, selectedPage-1);
+                } else if ( $(span).hasClass('right-arrow')) {
+                    var selectedPage = $(span).siblings('.selected')[0].page;
+                    var pagersCount = $(table).find('.pager').length;
+                    if ( selectedPage < pagersCount-1 )
+                        pager.moveToPage(table, selectedPage + 1);
+                }
+            });
             
             return tfoot;
             
@@ -681,73 +687,7 @@
         },
         setInputData : function(  ) {
 
-        }, 
-        moveToPage : function( table, pageNumber ) {
-            
-            var maxRowsPerPage = $(table).data('maxRowsPerPage');
-            var maxPagerItems = $(table).data('maxPagerItems');
-            var pagesCount = $(table).data('pagesCount');
-            
-            var begin = pageNumber * maxRowsPerPage ;
-            var end = begin + maxRowsPerPage;
-            
-            var rightSide = Math.floor( ( ( maxPagerItems / 2 ) -1 ) );
-            var leftSide = Math.floor(( ( maxPagerItems / 2 ) -1 ) );
-            
-            var tableRows = $(table).find('tbody').find('tr');
-            for ( var i = 0 ; i < tableRows.length ; ++i ) {
-                $(tableRows[i]).attr('style','');
-                if ( !( i >= begin && i < end ) ) {
-                    $(tableRows[i]).css('display', 'none');
-                }
-            }
-            
-            var pagerItems = $(table).find('tfoot .pager');
-            if ( pageNumber > leftSide + 1 ) {
-                $(table).find('tfoot').find('.left-dd').attr('style','');
-            } else {
-                $(table).find('tfoot').find('.left-dd').css('display', 'none');
-                rightSide += (leftSide+1-pageNumber);
-            }
-            
-            if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
-                $(table).find('tfoot').find('.right-dd').attr('style','');
-            } else {
-                $(table).find('tfoot').find('.right-dd').css('display', 'none');
-                leftSide += (rightSide+1-(pagesCount-(pageNumber+1)));
-            }
-            
-            var ha = pageNumber - leftSide - 1;
-            for ( var left = pageNumber ; left > 0 ; --left ) {
-                if ( left > ha ) {
-                    $(pagerItems[left]).attr('style','');
-                } else {
-                    $(pagerItems[left]).css('display', 'none');
-                }
-            }
-            
-            var he = pageNumber + rightSide ;
-            for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
-                if ( right <= he) {
-                    $(pagerItems[right]).attr('style','');
-                } else {
-                    $(pagerItems[right]).css('display', 'none');
-                }
-            }
-            
-            manipulator.clearPagerStatusAndApplySelected( pagerItems, pageNumber );
-            
-        }, 
-        clearPagerStatusAndApplySelected : function ( pagerItems , pageNumber ) {
-            for ( var i = 0 ; i < pagerItems.length ; ++i ) {
-                if ( i != pageNumber && $(pagerItems[i]).hasClass('selected') ) {
-                    $(pagerItems[i]).removeClass('selected');
-                } else if ( i == pageNumber ) {
-                    $(pagerItems[i]).addClass('selected');
-                }
-            }
         }
-
     }
 
     var builder = {
@@ -970,9 +910,6 @@
             return null;
         }
     }
-
-
-
     var converter = {
         currencyToDecimal : function( num ) {
             return num;
@@ -1153,11 +1090,100 @@
             
             var pagerItem = $(table).find(".selected")[0];
             if ( pagerItem ) {
-                manipulator.moveToPage(table, pagerItem.page);
+                //                manipulator.moveToPage(table, pagerItem.page);
+                pager.moveToPage(table, pagerItem.page);
             }
         }
     }
 
+    var pager = {
+        buildPagerItem : function( pageNumber ) {
+            var span = builder.buildSpan(null, 'pager page-count-'.concat(pageNumber), pageNumber+1);
+            span.page = pageNumber;
+            $(span).button();
+            return span;
+        },
+        compareCurrentNewCount : function( table ) {
+            var maxRowsPerPage  = $( table ).data( 'maxRowsPerPage' );
+            var rowsCount = table.tBodies[0].rows.length;
+            
+            var pagerItemsCount = pager.countNeededPagerItems( rowsCount , maxRowsPerPage );
+            var currentCount = $(table).find('tfoot .pager').length;
+            
+            return currentCount-pagerItemsCount;
+            
+        },
+        countNeededPagerItems : function( rowsCount , maxRowsPerPage ) {
+            return Math.ceil( rowsCount / maxRowsPerPage ) ;
+        },
+        moveToPage : function( table, pageNumber ) {
+            
+            var maxRowsPerPage = $(table).data('maxRowsPerPage');
+            var maxPagerItems = $(table).data('maxPagerItems');
+            var pagesCount = pager.countNeededPagerItems( table[0].tBodies[0].rows.length, maxRowsPerPage );
+            
+            var begin = pageNumber * maxRowsPerPage ;
+            var end = begin + maxRowsPerPage;
+            
+            var rightSide = Math.floor( ( ( maxPagerItems / 2 ) -1 ) );
+            var leftSide = Math.floor(( ( maxPagerItems / 2 ) -1 ) );
+            
+            var tableRows = $(table).find('tbody').find('tr');
+            for ( var i = 0 ; i < tableRows.length ; ++i ) {
+                $(tableRows[i]).attr('style','');
+                if ( !( i >= begin && i < end ) ) {
+                    $(tableRows[i]).css('display', 'none');
+                }
+            }
+            
+            var pagerItems = $(table).find('tfoot .pager');
+            if ( pageNumber > leftSide + 1 ) {
+                $(table).find('tfoot').find('.left-dd').attr('style','');
+            } else {
+                $(table).find('tfoot').find('.left-dd').css('display', 'none');
+                rightSide += (leftSide+1-pageNumber);
+            }
+            
+            if ( pageNumber < ( pagesCount - rightSide - 2 ) ) {
+                $(table).find('tfoot').find('.right-dd').attr('style','');
+            } else {
+                $(table).find('tfoot').find('.right-dd').css('display', 'none');
+                leftSide += (rightSide+1-(pagesCount-(pageNumber+1)));
+            }
+            
+            var ha = pageNumber - leftSide - 1;
+            for ( var left = pageNumber ; left > 0 ; --left ) {
+                if ( left > ha ) {
+                    $(pagerItems[left]).attr('style','');
+                } else {
+                    $(pagerItems[left]).css('display', 'none');
+                }
+            }
+            
+            var he = pageNumber + rightSide ;
+            for ( var right = pageNumber ; right < pagesCount-1 ; ++right ) {
+                if ( right <= he) {
+                    $(pagerItems[right]).attr('style','');
+                } else {
+                    $(pagerItems[right]).css('display', 'none');
+                }
+            }
+            
+            pager.clearPagerStatusAndApplySelected( pagerItems, pageNumber );
+            
+        },
+        clearPagerStatusAndApplySelected : function ( pagerItems , pageNumber ) {
+            for ( var i = 0 ; i < pagerItems.length ; ++i ) {
+                if ( i != pageNumber && $(pagerItems[i]).hasClass('selected') ) {
+                    $(pagerItems[i]).removeClass('selected');
+                } else if ( i == pageNumber ) {
+                    $(pagerItems[i]).addClass('selected');
+                }
+            }
+        }
+        
+    }
+    
     var methods = {
         init : function( settings ) {
             
@@ -1209,6 +1235,23 @@
             }
 
             $(tbody).append( tableRow );
+            
+            var comp = pager.compareCurrentNewCount( table[0] ) ;
+            if ( comp < 0 ) {
+                for ( var i = 0 ; i < comp*-1 ; ++i ) {
+                    var last = $(table).find('.pager:last');
+                    $(last).after(pager.buildPagerItem(last[0].page+1));
+                    $(table).find('tfoot .right-dd').before(last);
+                }
+            }
+            
+            var selectedPagerItem = $(table).find('tfoot .selected');
+            if ( selectedPagerItem && selectedPagerItem.length > 0 ) {
+                pager.moveToPage(table, selectedPagerItem[0].page);
+            } else {
+                pager.moveToPage(table, $(table).find('.pager:last')[0].page);
+            }
+            
         },
         getRow : function( table , index ) {
             return table[0].tBodies[0].rows[index];
