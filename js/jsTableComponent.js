@@ -1009,7 +1009,7 @@
             if ( !metadata[thead.fieldName].sortable ) {
                 return;
             }
-
+            
             var fieldName = thead.fieldName;
             var pairs = [];
             var value = null;
@@ -1151,7 +1151,10 @@
             
             var maxRowsPerPage = $(table).data('maxRowsPerPage');
             var maxPagerItems = $(table).data('maxPagerItems');
-            var pagesCount = pager.countNeededPagerItems( table[0].tBodies[0].rows.length, maxRowsPerPage );
+            if ( table && table.length  ) {
+                table = table[0];
+            }
+            var pagesCount = pager.countNeededPagerItems( table.tBodies[0].rows.length, maxRowsPerPage );
             
             var begin = pageNumber * maxRowsPerPage ;
             var end = begin + maxRowsPerPage;
@@ -1238,6 +1241,13 @@
             
             $( settings.self ).live( 'click', function(event) {
                 var target = event.target;
+                if (target.nodeName.toLowerCase() == 'span') {
+                    if ($(target).findFirstParent('th')) {
+                        target = $(target).findFirstParent('th');
+                        sorter.sortField( target[0], settings );
+                        return ;
+                    }
+                }
                 if ( $(target).hasClass("removable") ) {
                     manipulator.removeTableRow($(target).findFirstParent('tr')[0]);
                 } else if (target.nodeName.toLowerCase() == "td") {
