@@ -369,6 +369,7 @@
                     var span = pager.buildPagerItem(i);
                     if ( i == 0 ) {
                         $(span).addClass('selected');
+                        $(span).addClass('ui-state-active');
                     }
                     if ( i > ( settings.maxPagerItems - 2 ) && ( i != pagesCount-1 ) ) {
                         $(span).css('display', 'none');
@@ -411,6 +412,19 @@
                     if ( selectedPage < pagersCount-1 )
                         pager.moveToPage(table, selectedPage + 1);
                 }
+            });
+            
+            $(settings.self).find('tfoot .pager').live('mouseover mouseleave', function(event) {
+                if (event.type == 'mouseover') {
+                    if ( $(this).hasClass('selected') && !$(this).hasClass('ui-state-active') ) {
+                        $(this).addClass('ui-state-active');
+                    }
+                } else {
+                    if ( $(this).hasClass('selected') && !$(this).hasClass('ui-state-active') ) {
+                        $(this).addClass('ui-state-active');
+                    }
+                }
+                return false;
             });
             
             return tfoot;
@@ -1193,8 +1207,10 @@
             for ( var i = 0 ; i < pagerItems.length ; ++i ) {
                 if ( i != pageNumber && $(pagerItems[i]).hasClass('selected') ) {
                     $(pagerItems[i]).removeClass('selected');
+                    $(pagerItems[i]).removeClass('ui-state-active');
                 } else if ( i == pageNumber ) {
                     $(pagerItems[i]).addClass('selected');
+                    $(pagerItems[i]).addClass('ui-state-active');
                 }
             }
         }
