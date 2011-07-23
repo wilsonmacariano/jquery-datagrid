@@ -550,7 +550,8 @@ $("#tableComponent2").jsTableComponent( {
     metadata : metadata,
     data: data,
     relatedTables : relatedTables,
-    headerStyle: 2
+    headerStyle: 2,
+    rowsRemovable : false
 });
 
 
